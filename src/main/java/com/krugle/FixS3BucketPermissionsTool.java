@@ -1,3 +1,23 @@
+/*
+ *  Copyright 2018 Aragon Consulting Group
+ * 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.krugle;
 
 import java.util.Iterator;
@@ -28,11 +48,8 @@ public class FixS3BucketPermissionsTool {
             printUsageAndExit(parser);
         }
 
-        final String bucketName = options.getBucket(); // "backups.aragoncg.com";
-        final String region = options.getRegion(); // Regions.US_EAST_2.getName();
-        
-        // "AKIAINCKT5CHMLO6ZNCA"
-        // "OuataHbmywHD5ZmaX6NPmRwtllUczGdzGvFRlbkK"
+        final String bucketName = options.getBucket();
+        final String region = options.getRegion();
         
         try {
             AWSCredentialsProvider credentials = new S3CredentialsProviderChain(options.getAccessKey(), options.getSecretKey());
@@ -42,7 +59,7 @@ public class FixS3BucketPermissionsTool {
                             .withRegion(region)
                             .build();
 
-            Iterator<String> iter = new S3DirectoryLister(credentials, region, bucketName, "public_html/", false);
+            Iterator<String> iter = new S3DirectoryLister(credentials, region, bucketName, options.getPath(), false);
             int fileCount = 0;
             while (iter.hasNext()) {
                 String path = iter.next();
@@ -59,9 +76,15 @@ public class FixS3BucketPermissionsTool {
         }
     }
 
+    private static void printUsageAndExit(CmdLineParser parser) {
+        parser.printUsage(System.err);
+        System.exit(-1);
+    }
+
     private static class FixS3BucketPermissionsOptions {
 
         private String _bucket;
+        private String _path;
         private String _region = Regions.US_EAST_2.getName();
         private String _accessKey;
         private String _secretKey;
@@ -73,6 +96,15 @@ public class FixS3BucketPermissionsTool {
 
         public String getBucket() {
             return _bucket;
+        }
+
+        @Option(name = "-path", usage = "path (prefix) for files in bucket", required = true)
+        public void setPath(String path) {
+            _path = path;
+        }
+
+        public String getPath() {
+            return _path;
         }
 
         @Option(name = "-region", usage = "AWS region (default = us-east-2)", required = false)
