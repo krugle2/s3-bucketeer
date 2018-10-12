@@ -85,7 +85,7 @@ public class FixS3BucketPermissionsTool {
 
         private String _bucket;
         private String _path;
-        private String _region = Regions.US_EAST_2.getName();
+        private String _region = Regions.US_WEST_2.getName();
         private String _accessKey;
         private String _secretKey;
 
